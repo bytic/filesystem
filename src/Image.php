@@ -1,18 +1,18 @@
 <?php
 
+namespace Nip\Filesystem;
+
 /**
- * Nip Framework.
+ * Nip Framework
  *
  * @category   Nip
- *
  * @copyright  2009 Nip Framework
  * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
- *
  * @version    SVN: $Id: Image.php 193 2009-06-23 23:11:53Z victorstanciu $
  */
-class Nip_File_Image extends Nip_File_Handler
+class Image extends File
 {
-    public $extensions = ['jpg', 'jpeg', 'gif', 'png'];
+    public $extensions = ["jpg", "jpeg", "gif", "png"];
     public $quality = 90;
     public $type = 'jpg';
     public $max_width = false;
@@ -35,7 +35,6 @@ class Nip_File_Image extends Nip_File_Handler
 
     /**
      * @param string $path
-     *
      * @return bool
      */
     public function setResourceFromFile($path)
@@ -121,7 +120,7 @@ class Nip_File_Image extends Nip_File_Handler
      */
     public function setBaseName($name)
     {
-        $name = $name.'.'.$this->type;
+        $name = $name . '.' . $this->type;
         $this->setName($name);
     }
 
@@ -131,8 +130,8 @@ class Nip_File_Image extends Nip_File_Handler
     public function setName($name)
     {
         $this->name = $name;
-        $this->url = dirname($this->url).'/'.$this->name;
-        $this->path = dirname($this->path).'/'.$this->name;
+        $this->url = dirname($this->url) . '/' . $this->name;
+        $this->path = dirname($this->path) . '/' . $this->name;
     }
 
     /**
@@ -169,14 +168,12 @@ class Nip_File_Image extends Nip_File_Handler
 
             if ($return) {
                 chmod($this->path, 0777);
-
                 return true;
             }
             $this->errors[] = 'Error saving file';
         } else {
             $this->errors[] = 'Error creating directory';
         }
-
         return false;
     }
 
@@ -254,7 +251,6 @@ class Nip_File_Image extends Nip_File_Handler
     /**
      * @param bool|int $max_width
      * @param bool|int $max_height
-     *
      * @return $this
      */
     public function resizeToLarge($max_width = false, $max_height = false)
@@ -292,8 +288,8 @@ class Nip_File_Image extends Nip_File_Handler
     }
 
     /**
-     * @param $x
-     * @param $y
+     * @param double $x
+     * @param double $y
      * @param $dwidth
      * @param $dheight
      * @param $swidth
@@ -317,10 +313,9 @@ class Nip_File_Image extends Nip_File_Handler
     }
 
     /**
-     * @param int   $amount
+     * @param int $amount
      * @param float $radius
-     * @param int   $threshold
-     *
+     * @param int $threshold
      * @return $this
      */
     public function unsharpMask($amount = 80, $radius = 0.5, $threshold = 3)
@@ -369,12 +364,12 @@ class Nip_File_Image extends Nip_File_Handler
         if ($threshold > 0) {
             for ($x = 0; $x < $w - 1; $x++) {
                 for ($y = 0; $y < $h; $y++) {
-                    $rgbOrig = imagecolorat($img, $x, $y);
+                    $rgbOrig = ImageColorAt($img, $x, $y);
                     $rOrig = (($rgbOrig >> 16) & 0xFF);
                     $gOrig = (($rgbOrig >> 8) & 0xFF);
                     $bOrig = ($rgbOrig & 0xFF);
 
-                    $rgbBlur = imagecolorat($imgBlur, $x, $y);
+                    $rgbBlur = ImageColorAt($imgBlur, $x, $y);
 
                     $rBlur = (($rgbBlur >> 16) & 0xFF);
                     $gBlur = (($rgbBlur >> 8) & 0xFF);
@@ -385,20 +380,20 @@ class Nip_File_Image extends Nip_File_Handler
                     $bNew = (abs($bOrig - $bBlur) >= $threshold) ? max(0, min(255, ($amount * ($bOrig - $bBlur)) + $bOrig)) : $bOrig;
 
                     if (($rOrig != $rNew) || ($gOrig != $gNew) || ($bOrig != $bNew)) {
-                        $pixCol = imagecolorallocate($img, $rNew, $gNew, $bNew);
-                        imagesetpixel($img, $x, $y, $pixCol);
+                        $pixCol = ImageColorAllocate($img, $rNew, $gNew, $bNew);
+                        ImageSetPixel($img, $x, $y, $pixCol);
                     }
                 }
             }
         } else {
             for ($x = 0; $x < $w; $x++) {
                 for ($y = 0; $y < $h; $y++) {
-                    $rgbOrig = imagecolorat($img, $x, $y);
+                    $rgbOrig = ImageColorAt($img, $x, $y);
                     $rOrig = (($rgbOrig >> 16) & 0xFF);
                     $gOrig = (($rgbOrig >> 8) & 0xFF);
                     $bOrig = ($rgbOrig & 0xFF);
 
-                    $rgbBlur = imagecolorat($imgBlur, $x, $y);
+                    $rgbBlur = ImageColorAt($imgBlur, $x, $y);
 
                     $rBlur = (($rgbBlur >> 16) & 0xFF);
                     $gBlur = (($rgbBlur >> 8) & 0xFF);
@@ -423,7 +418,7 @@ class Nip_File_Image extends Nip_File_Handler
                         $bNew = 0;
                     }
                     $rgbNew = ($rNew << 16) + ($gNew << 8) + $bNew;
-                    imagesetpixel($img, $x, $y, $rgbNew);
+                    ImageSetPixel($img, $x, $y, $rgbNew);
                 }
             }
         }
@@ -435,11 +430,10 @@ class Nip_File_Image extends Nip_File_Handler
     }
 
     /**
-     * @param Nip_File_Image $image
-     *
+     * @param Image $image
      * @return $this
      */
-    public function copyResource(self $image)
+    public function copyResource($image)
     {
         $this->_width = $image->getWidth();
         $this->_height = $image->getHeight();
@@ -459,7 +453,7 @@ class Nip_File_Image extends Nip_File_Handler
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getFile()
     {

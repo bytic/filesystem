@@ -1,144 +1,147 @@
 <?php
 
-class Nip_File_Exception extends Exception
-{
-}
+namespace Nip\Filesystem;
 
-class Nip_File extends Nip_Object
-{
-    protected $_path;
-    protected $_name;
-    protected $_extension;
+use League\Flysystem\FilesystemInterface;
 
-    public function __construct($path = false)
+/**
+ * Class File
+ * @package Nip\Filesystem
+ *
+ * @method FilesystemInterface|FileDisk getFilesystem
+ */
+class File extends \League\Flysystem\File
+{
+
+    /**
+     * @var
+     */
+    protected $name;
+    /**
+     * @var
+     */
+    protected $url;
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct(FilesystemInterface $filesystem = null, $path = null)
     {
-        if ($path) {
-            $this->setPath($path);
-        }
+        $this->parseNameFromPath($path);
+        return parent::__construct($filesystem, $path);
     }
 
-    public function move($target)
+    /**
+     * @param $path
+     */
+    protected function parseNameFromPath($path)
     {
-        $dir = dirname($target);
-        if (!is_dir($target)) {
-            mkdir($dir, 0755, true);
-        }
-
-        if (rename($this->getPath(), $target)) {
-            $this->setPath($target);
-        } else {
-            throw new Nip_File_Exception("Cannot move $this->_path file to $target");
-        }
-
-        return $this;
+        $name = pathinfo($path, PATHINFO_BASENAME);
+        $this->setName($name);
     }
 
-    public function copy($target)
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setFileName($name)
     {
-        $dir = dirname($target);
-        if (!is_dir($target)) {
-            mkdir($dir, 0755, true);
-        }
-
-        if (copy($this->getPath(), $target)) {
-            $this->setPath($target);
-        } else {
-            throw new Nip_File_Exception("Cannot copy $this->_path file to $target");
-        }
+        $path_parts = pathinfo($this->getPath());
+        $path_parts['filename'] = $name;
+        $this->setPath(
+            $path_parts['dirname']
+            . '/' . $path_parts['filename'] . '.' . $path_parts['extension']
+        );
 
         return $this;
     }
 
     /**
-     * @param string $target
+     * Get File path with init check
      *
-     * @return Nip_Process
+     * @return string
      */
-    public function unzip($target)
+    public function getPath()
     {
-        if (!is_dir($target)) {
-            mkdir($target, 0755, true);
+        if (!$this->path) {
+            $this->initPath();
         }
-
-        $process = new Nip_Process("unzip {$this->_path}  -d $target");
-        $process->run();
-
-        return $process;
+        return parent::getPath();
     }
 
-    public function download($filename = false, $contentType = false)
+    /**
+     * @return void
+     */
+    protected function initPath()
     {
-        if (!$filename) {
-            $filename = $this->getName();
-        }
-        if (!$contentType) {
-            $contentType = 'application/force-download';
-        }
-
-        header('Pragma: public');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Cache-Control: private', false);
-        header("Content-Type: $contentType");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header("Content-Length: {$this->getSize()}");
-        header('Content-Transfer-Encoding: binary');
-
-        readfile($this->getPath());
-        exit();
+        $this->setPath($this->getPathFolder() . $this->getName());
     }
 
-    public function delete()
-    {
-        unlink($this->getPath());
-    }
-
+    /**
+     * @inheritdoc
+     * @param string $path
+     */
     public function setPath($path)
     {
-        $this->_name = basename($path);
-        $this->_extension = pathinfo($path, PATHINFO_EXTENSION);
-        $this->_path = $path;
+        $this->parseNameFromPath($path);
+        return parent::setPath($path);
+    }
 
+    /**
+     * @return string
+     */
+    public function getPathFolder()
+    {
+        return '/';
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        if (!$this->name) {
+            $this->initName();
+        }
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
         return $this;
     }
 
-    public function getName()
+    protected function initName()
     {
-        return $this->_name;
+        $this->name = $this->getDefaultName();
     }
 
-    public function getExtension()
+    /**
+     * @return string
+     */
+    public function getDefaultName()
     {
-        return $this->_extension;
+        return 'file';
     }
 
-    public function getSize()
+    /**
+     * @return mixed
+     */
+    public function getUrl()
     {
-        return filesize($this->getPath());
-    }
-
-    public function getTime()
-    {
-        return filemtime($this->getPath());
-    }
-
-    public function getPath()
-    {
-        return $this->_path;
-    }
-
-    public function getMimeType()
-    {
-        if (function_exists('mime_content_type')) {
-            return mime_content_type($this->getPath());
-        } elseif (function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME);
-            $mimetype = finfo_file($finfo, $this->getPath());
-            finfo_close($finfo);
-
-            return $mimetype;
+        if (!$this->url) {
+            $this->initUrl();
         }
+        return $this->url;
+    }
 
-        return 'unknown';
+    protected function initUrl()
+    {
+        $this->url = $this->getFilesystem()->getUrl($this->getPath());
     }
 }
