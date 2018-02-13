@@ -22,11 +22,16 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Nip\\Filesystem\\Tests\\": "tests/"
+      "Nip\\Filesystem\\Tests\\": "tests/src"
     }
   },
   "require": {
     "php": "^7.0",
+    "bytic/application": "^0.9",
+    "bytic/config": "^0.9",
+    "bytic/container": "^0.9",
+    "bytic/utility": "^1.0",
+    "symfony/filesystem": "^4.2",
     "league/flysystem": "^1.0"
   },
   "require-dev": {
