@@ -15,7 +15,7 @@
       "Nip\\Filesystem\\": "src"
     },
     "classmap": [
-      "src"
+      "legacy"
     ],
     "files": [
     ]
