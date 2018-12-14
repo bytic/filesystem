@@ -55,6 +55,7 @@ class FilesystemManager
     public function disk($name = null)
     {
         $name = $name ?: $this->getDefaultDriver();
+
         return $this->disks[$name] = $this->get($name);
     }
 
@@ -89,12 +90,15 @@ class FilesystemManager
      */
     protected function resolve($name)
     {
-        $config = $this->getConfig($name)->toArray();
+        $config = $this->getConfig($name);
+        if (empty($config)) {
+            throw new InvalidArgumentException("No configuration found for Disk [{$name}].");
+        }
 
         if (isset($this->customCreators[$config['driver']])) {
             return $this->callCustomCreator($config);
         }
-        $driverMethod = 'create' . ucfirst($config['driver']) . 'Driver';
+        $driverMethod = 'create'.ucfirst($config['driver']).'Driver';
         if (method_exists($this, $driverMethod)) {
             return $this->{$driverMethod}($config);
         } else {
@@ -106,11 +110,20 @@ class FilesystemManager
      * Get the filesystem connection configuration.
      *
      * @param  string $name
-     * @return Config
+     * @return array
      */
     protected function getConfig($name)
     {
-        return config("filesystems.disks.{$name}");
+        if (!function_exists('config')) {
+            return null;
+        }
+        $config = config();
+        $configName = "filesystems.disks.{$name}";
+        if (!$config->has($configName)) {
+            return null;
+        }
+
+        return $config->get($configName)->toArray();
     }
 
     /**
@@ -125,6 +138,7 @@ class FilesystemManager
         if ($driver instanceof FilesystemInterface) {
             return $this->adapt($driver);
         }
+
         return $driver;
     }
 
