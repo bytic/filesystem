@@ -1,6 +1,8 @@
 <?php
 namespace Nip\Filesystem;
+
 use League\Flysystem\FilesystemInterface;
+
 /**
  * Class File
  * @package Nip\Filesystem
