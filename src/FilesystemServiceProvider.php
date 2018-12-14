@@ -21,7 +21,8 @@ class FilesystemServiceProvider extends AbstractServiceProvider
     {
         return [
             'files',
-            'filesystem', 'filesystem.disk'
+            'filesystem',
+            'filesystem.disk'
         ];
     }
 
@@ -55,12 +56,19 @@ class FilesystemServiceProvider extends AbstractServiceProvider
     {
         $this->registerManager();
 
-        $this->getContainer()->share('filesystem.disk', function () {
-            return app('filesystem')->disk($this->getDefaultDriver());
+        $defaultDriver = $this->getDefaultDriver();
+        if ($defaultDriver) {
+            $this->getContainer()->share('filesystem.disk', function () {
+                return app('filesystem')->disk($this->getDefaultDriver());
         });
-        $this->getContainer()->share('filesystem.cloud', function () {
-            return app('filesystem')->disk($this->getCloudDriver());
-        });
+}
+
+        $cloudDriver = $this->getDefaultDriver();
+        if ($cloudDriver) {
+            $this->getContainer()->share('filesystem.cloud', function () {
+                return app('filesystem')->disk($this->getCloudDriver());
+            });
+        }
     }
 
     /**
@@ -71,7 +79,9 @@ class FilesystemServiceProvider extends AbstractServiceProvider
     protected function registerManager()
     {
         $this->getContainer()->share('filesystem', function () {
-            return new FilesystemManager($this->getContainer()->get('app'));
+            $app = $this->getContainer()->has('app') ? $this->getContainer()->get('app') : null;
+
+            return new FilesystemManager($app);
         });
     }
 
@@ -82,7 +92,7 @@ class FilesystemServiceProvider extends AbstractServiceProvider
      */
     protected function getDefaultDriver()
     {
-        return config('filesystems.default');
+        return function_exists('config') ? config('filesystems.default') : null;
     }
 
     /**
@@ -92,6 +102,6 @@ class FilesystemServiceProvider extends AbstractServiceProvider
      */
     protected function getCloudDriver()
     {
-        return config('filesystems.cloud');
+        return function_exists('config') ? config('filesystems.cloud') : null;
     }
 }
