@@ -20,12 +20,14 @@ class FilesystemManager
      * @var \Nip\Application
      */
     protected $app;
+
     /**
      * The array of resolved filesystem drivers.
      *
      * @var FileDisk[]
      */
     protected $disks = [];
+
     /**
      * The registered custom driver creators.
      *
