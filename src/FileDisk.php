@@ -80,11 +80,9 @@ class FileDisk extends Flysystem
         // it as the base URL instead of the default path. This allows the developer to
         // have full control over the base path for this filesystem's generated URLs.
         if ($config->has('url')) {
-            return rtrim($config->get('url'), '/') . '/' . ltrim($path, '/');
+            return rtrim($config->get('url'), '/').'/'.ltrim($path, '/');
         }
-
         $path = '/storage/' . $path;
-
         // If the path contains "storage/public", it probably means the developer is using
         // the default disk to generate the path instead of the "public" disk like they
         // are really supposed to use. We will remove the public from this path here.

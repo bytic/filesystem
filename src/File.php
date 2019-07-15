@@ -1,5 +1,4 @@
 <?php
-
 namespace Nip\Filesystem;
 
 use League\Flysystem\FilesystemInterface;
@@ -12,7 +11,6 @@ use League\Flysystem\FilesystemInterface;
  */
 class File extends \League\Flysystem\File
 {
-
     /**
      * @var
      */
@@ -21,7 +19,6 @@ class File extends \League\Flysystem\File
      * @var
      */
     protected $url;
-
     /**
      * @inheritdoc
      */
@@ -30,7 +27,6 @@ class File extends \League\Flysystem\File
         $this->parseNameFromPath($path);
         return parent::__construct($filesystem, $path);
     }
-
     /**
      * @param $path
      */
@@ -39,7 +35,7 @@ class File extends \League\Flysystem\File
         $name = pathinfo($path, PATHINFO_BASENAME);
         $this->setName($name);
     }
-
+    
     /**
      * @param string $name
      * @return $this
@@ -52,7 +48,6 @@ class File extends \League\Flysystem\File
             $path_parts['dirname']
             . '/' . $path_parts['filename'] . '.' . $path_parts['extension']
         );
-
         return $this;
     }
 
@@ -68,7 +63,6 @@ class File extends \League\Flysystem\File
         }
         return parent::getPath();
     }
-
     /**
      * @return void
      */
@@ -76,7 +70,6 @@ class File extends \League\Flysystem\File
     {
         $this->setPath($this->getPathFolder() . $this->getName());
     }
-
     /**
      * @inheritdoc
      * @param string $path
@@ -86,7 +79,6 @@ class File extends \League\Flysystem\File
         $this->parseNameFromPath($path);
         return parent::setPath($path);
     }
-
     /**
      * @return string
      */
@@ -105,7 +97,6 @@ class File extends \League\Flysystem\File
         }
         return $this->name;
     }
-
     /**
      * @param string $name
      * @return $this
@@ -115,12 +106,10 @@ class File extends \League\Flysystem\File
         $this->name = $name;
         return $this;
     }
-
     protected function initName()
     {
         $this->name = $this->getDefaultName();
     }
-
     /**
      * @return string
      */
@@ -128,7 +117,7 @@ class File extends \League\Flysystem\File
     {
         return 'file';
     }
-
+    
     /**
      * @return mixed
      */
@@ -139,7 +128,6 @@ class File extends \League\Flysystem\File
         }
         return $this->url;
     }
-
     protected function initUrl()
     {
         $this->url = $this->getFilesystem()->getUrl($this->getPath());

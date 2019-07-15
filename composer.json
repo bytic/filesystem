@@ -15,24 +15,27 @@
       "Nip\\Filesystem\\": "src"
     },
     "classmap": [
-      "src"
+      "legacy"
     ],
     "files": [
     ]
   },
   "autoload-dev": {
     "psr-4": {
-      "Nip\\Filesystem\\Tests\\": "tests/"
+      "Nip\\Filesystem\\Tests\\": "tests/src"
     }
   },
   "require": {
     "php": "^7.0",
     "bytic/config": "^1.0",
+    "bytic/container": "^1.0",
+    "bytic/utility": "^1.0",
+    "symfony/filesystem": "^4.2",
     "league/flysystem": "^1.0"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.0",
-    "phpunit/phpunit": "^6.2",
-    "mockery/mockery": "^0.9"
+    "phpunit/phpunit": "^7.3",
+    "mockery/mockery": "^1.1"
   }
 }

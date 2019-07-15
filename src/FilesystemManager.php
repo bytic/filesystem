@@ -41,9 +41,11 @@ class FilesystemManager
      *
      * @param  \Nip\Application $app
      */
-    public function __construct($app)
+    public function __construct($app = null)
     {
-        $this->app = $app;
+        if ($app) {
+            $this->app = $app;
+        }
     }
 
     /**
