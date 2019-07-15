@@ -3,6 +3,7 @@
 namespace Nip\Filesystem;
 
 use League\Flysystem\Adapter\Local as LocalAdapter;
+use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use League\Flysystem\Filesystem as Flysystem;
 use Nip\Utility\Str;
 use RuntimeException;
@@ -20,10 +21,10 @@ class FileDisk extends Flysystem
     /**
      * Store the uploaded file on the disk with a given name.
      *
-     * @param  string $path
-     * @param  UploadedFile $file
-     * @param  string $name
-     * @param  array $options
+     * @param string $path
+     * @param UploadedFile $file
+     * @param string $name
+     * @param array $options
      * @return string|false
      */
     public function putFileAs($path, $file, $name, $options = [])
@@ -48,7 +49,7 @@ class FileDisk extends Flysystem
     /**
      * Get the URL for the file at the given path.
      *
-     * @param  string $path
+     * @param string $path
      * @return string
      */
     public function getUrl($path)
@@ -57,8 +58,8 @@ class FileDisk extends Flysystem
 
         if (method_exists($adapter, 'getUrl')) {
             return $adapter->getUrl($path);
-//        } elseif ($adapter instanceof AwsS3Adapter) {
-//            return $this->getAwsUrl($adapter, $path);
+        } elseif ($adapter instanceof AwsS3Adapter) {
+            return $this->getAwsUrl($adapter, $path);
         } elseif ($adapter instanceof LocalAdapter) {
             return $this->getLocalUrl($path);
         } else {
@@ -69,7 +70,7 @@ class FileDisk extends Flysystem
     /**
      * Get the URL for the file at the given path.
      *
-     * @param  string $path
+     * @param string $path
      * @return string
      */
     protected function getLocalUrl($path)
@@ -80,7 +81,7 @@ class FileDisk extends Flysystem
         // it as the base URL instead of the default path. This allows the developer to
         // have full control over the base path for this filesystem's generated URLs.
         if ($config->has('url')) {
-            return rtrim($config->get('url'), '/').'/'.ltrim($path, '/');
+            return $this->concatPathToUrl($config->get('url'), $path);
         }
         $path = '/storage/' . $path;
         // If the path contains "storage/public", it probably means the developer is using
@@ -91,5 +92,39 @@ class FileDisk extends Flysystem
         } else {
             return $path;
         }
+    }
+
+    /**
+     * Get the URL for the file at the given path.
+     *
+     * @param \League\Flysystem\AwsS3v3\AwsS3Adapter $adapter
+     * @param string $path
+     * @return string
+     */
+    protected function getAwsUrl($adapter, $path)
+    {
+        // If an explicit base URL has been set on the disk configuration then we will use
+        // it as the base URL instead of the default path. This allows the developer to
+        // have full control over the base path for this filesystem's generated URLs.
+        if (!is_null($url = $this->getConfig()->get('url'))) {
+            return $this->concatPathToUrl($url, $adapter->getPathPrefix() . $path);
+        }
+
+        return $adapter->getClient()->getObjectUrl(
+            $adapter->getBucket(),
+            $adapter->getPathPrefix() . $path
+        );
+    }
+
+    /**
+     * Concatenate a path to a URL.
+     *
+     * @param string $url
+     * @param string $path
+     * @return string
+     */
+    protected function concatPathToUrl($url, $path)
+    {
+        return rtrim($url, '/') . '/' . ltrim($path, '/');
     }
 }
