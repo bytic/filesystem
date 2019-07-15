@@ -7,6 +7,7 @@ use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FilesystemInterface;
 use Nip\Config\Config;
+use Nip\Filesystem\FilesystemManager\HasCloudDriverTrait;
 
 /**
  * Class FilesystemManager
@@ -14,6 +15,8 @@ use Nip\Config\Config;
  */
 class FilesystemManager
 {
+    use HasCloudDriverTrait;
+
     /**
      * The application instance.
      *

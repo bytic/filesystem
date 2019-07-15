@@ -34,8 +34,14 @@
     "league/flysystem": "^1.0"
   },
   "require-dev": {
+    "league/flysystem-aws-s3-v3": "^1.0",
     "squizlabs/php_codesniffer": "^3.0",
     "phpunit/phpunit": "^7.3",
     "mockery/mockery": "^1.1"
+  },
+  "suggest": {
+    "league/flysystem-aws-s3-v3": "Required to use the Flysystem S3 driver (^1.0).",
+    "league/flysystem-cached-adapter": "Required to use the Flysystem cache (^1.0).",
+    "league/flysystem-sftp": "Required to use the Flysystem SFTP driver (^1.0)."
   }
 }
