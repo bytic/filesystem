@@ -91,7 +91,7 @@ class FilesystemServiceProvider extends AbstractServiceProvider
      */
     protected function getDefaultDriver()
     {
-        return function_exists('config') ? config('filesystems.default') : null;
+        return function_exists('config') && function_exists('app') ? config('filesystems.default') : null;
     }
 
     /**

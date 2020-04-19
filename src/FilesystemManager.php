@@ -6,8 +6,6 @@ use InvalidArgumentException;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FilesystemInterface;
-use Nip\Config\Config;
-use Nip\Filesystem\FilesystemManager\HasCloudDriverTrait;
 
 /**
  * Class FilesystemManager
@@ -15,7 +13,9 @@ use Nip\Filesystem\FilesystemManager\HasCloudDriverTrait;
  */
 class FilesystemManager
 {
-    use HasCloudDriverTrait;
+    use FilesystemManager\HasCloudDriverTrait;
+    use FilesystemManager\HasDisksTrait;
+    use FilesystemManager\HasCacheStoreTrait;
 
     /**
      * The application instance.
@@ -23,13 +23,6 @@ class FilesystemManager
      * @var \Nip\Application
      */
     protected $app;
-
-    /**
-     * The array of resolved filesystem drivers.
-     *
-     * @var FileDisk[]
-     */
-    protected $disks = [];
 
     /**
      * The registered custom driver creators.
@@ -48,40 +41,6 @@ class FilesystemManager
         if ($app) {
             $this->app = $app;
         }
-    }
-
-    /**
-     * Get a filesystem instance.
-     *
-     * @param  string $name
-     * @return FileDisk
-     */
-    public function disk($name = null)
-    {
-        $name = $name ?: $this->getDefaultDriver();
-
-        return $this->disks[$name] = $this->get($name);
-    }
-
-    /**
-     * Get the default driver name.
-     *
-     * @return string
-     */
-    public function getDefaultDriver()
-    {
-        return config('filesystems.default');
-    }
-
-    /**
-     * Attempt to get the disk from the local cache.
-     *
-     * @param  string $name
-     * @return FileDisk
-     */
-    protected function get($name)
-    {
-        return isset($this->disks[$name]) ? $this->disks[$name] : $this->resolve($name);
     }
 
     /**
@@ -193,8 +152,12 @@ class FilesystemManager
     protected function createDisk(AdapterInterface $adapter, $config)
     {
 //        $config = Arr::only($config, ['visibility', 'disable_asserts', 'url']);
+
+        $this->checkForCacheNeeded($adapter, $config);
+
         return new FileDisk($adapter, count($config) > 0 ? $config : null);
     }
+
 
     /**
      * Set the given disk instance.
