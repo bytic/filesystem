@@ -4,6 +4,7 @@ namespace Nip\Filesystem;
 
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\Cached\CachedAdapter;
 use League\Flysystem\Filesystem as Flysystem;
 use Nip\Utility\Str;
 use RuntimeException;
@@ -55,6 +56,10 @@ class FileDisk extends Flysystem
     public function getUrl($path)
     {
         $adapter = $this->getAdapter();
+
+        if ($adapter instanceof CachedAdapter) {
+            $adapter = $adapter->getAdapter();
+        }
 
         if (method_exists($adapter, 'getUrl')) {
             return $adapter->getUrl($path);
