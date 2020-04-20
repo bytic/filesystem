@@ -4,6 +4,7 @@ namespace Nip\Filesystem\FilesystemManager;
 
 use League\Flysystem\Cached\CachedAdapter;
 use League\Flysystem\Cached\Storage\Memory as MemoryStore;
+use Nip\Filesystem\Cache;
 use Nip\Utility\Arr;
 
 /**
@@ -39,20 +40,30 @@ trait HasCacheStoreTrait
      * Create a cache store instance.
      *
      * @param mixed $config
-     * @return \League\Flysystem\Cached\CacheInterface|MemoryStore
+     * @return \League\Flysystem\Cached\CacheInterface|MemoryStore|Cache
      *
      * @throws \InvalidArgumentException
      */
     protected function createCacheStore($config)
     {
-//        if ($config === true) {
-        return new MemoryStore;
-//        }
-//
-//        return new Cache(
-//            $this->app['cache']->store($config['store']),
-//            $config['prefix'] ?? 'flysystem',
-//            $config['expire'] ?? null
-//        );
+        if ($config === true) {
+            return new MemoryStore;
+        }
+
+        $cacheManager = $this->getCacheManager();
+
+        return new Cache(
+            $cacheManager->store($config['store']),
+            $config['prefix'] ?? 'flysystem',
+            $config['expire'] ?? null
+        );
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getCacheManager()
+    {
+        return app('cache');
     }
 }
