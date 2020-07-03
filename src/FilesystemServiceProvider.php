@@ -3,6 +3,7 @@
 namespace Nip\Filesystem;
 
 use Nip\Container\ServiceProviders\Providers\AbstractServiceProvider;
+use Nip\Container\ServiceProviders\Providers\BootableServiceProviderInterface;
 
 /**
  * Class FilesystemServiceProvider
@@ -11,7 +12,7 @@ use Nip\Container\ServiceProviders\Providers\AbstractServiceProvider;
  * @inspiration https://github.com/laravel/framework/blob/5.4/src/Illuminate/Filesystem/FilesystemServiceProvider.php
  *
  */
-class FilesystemServiceProvider extends AbstractServiceProvider
+class FilesystemServiceProvider extends AbstractServiceProvider implements BootableServiceProviderInterface
 {
 
     /**
@@ -19,11 +20,7 @@ class FilesystemServiceProvider extends AbstractServiceProvider
      */
     public function provides()
     {
-        return [
-            'files',
-            'filesystem',
-            'filesystem.disk'
-        ];
+        return ['files', 'filesystem', 'filesystem.disk'];
     }
 
     /**
@@ -33,6 +30,11 @@ class FilesystemServiceProvider extends AbstractServiceProvider
     {
         $this->registerNativeFilesystem();
         $this->registerFlysystem();
+    }
+
+    public function boot()
+    {
+        $this->mergeDefaultFilesystem();
     }
 
     /**
@@ -103,5 +105,34 @@ class FilesystemServiceProvider extends AbstractServiceProvider
     protected function getCloudDriver()
     {
         return function_exists('config') ? config('filesystems.cloud') : null;
+    }
+
+    protected function mergeDefaultFilesystem()
+    {
+        $config = app('config');
+
+        if ($config->has('filesystems')) {
+            return;
+        }
+
+        $urlUploads = defined('UPLOADS_URL') ? UPLOADS_URL : '';
+
+        $config = new Config([
+            'filesystems' => [
+                'disks' => [
+                    'local' => [
+                        'driver' => 'local',
+                        'root' => UPLOADS_PATH,
+                    ],
+                    'public' => [
+                        'driver' => 'local',
+                        'root' => UPLOADS_PATH,
+                        'url' => $urlUploads,
+                        'visibility' => 'public',
+                    ]
+                ]
+            ]
+        ]);
+        app('config')->merge($config);
     }
 }
