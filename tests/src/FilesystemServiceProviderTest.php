@@ -15,6 +15,7 @@ class FilesystemServiceProviderTest extends AbstractTest
     public function testRegister()
     {
         $provider = new FilesystemServiceProvider();
+        $provider->initContainer();
         $provider->register();
 
         $filesystem = $provider->getContainer()->get('files');

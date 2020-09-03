@@ -31,7 +31,7 @@
     "bytic/cache": "^0.9|^1.0",
     "bytic/container": "^0.9|^1.0",
     "bytic/utility": "^1.0",
-    "symfony/filesystem": "^4.2",
+    "symfony/filesystem": "^4.2|5.0",
     "league/flysystem": "^1.0",
     "league/flysystem-cached-adapter": "^1.0"
   },

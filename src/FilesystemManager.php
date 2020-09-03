@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use League\Flysystem\Adapter\Local as LocalAdapter;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FilesystemInterface;
+use Nip\Config\Config;
 
 /**
  * Class FilesystemManager
@@ -59,6 +60,10 @@ class FilesystemManager
             throw new InvalidArgumentException("No configuration found for Disk [{$name}].");
         }
 
+        if (is_string($config)) {
+            return $this->get($config);
+        }
+
         if (isset($this->customCreators[$config['driver']])) {
             return $this->callCustomCreator($config);
         }
@@ -87,7 +92,9 @@ class FilesystemManager
             return null;
         }
 
-        return $config->get($configName)->toArray();
+        $value = $config->get($configName);
+
+        return $value instanceof Config ? $value->toArray() : $value;
     }
 
     /**
