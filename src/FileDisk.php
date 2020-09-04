@@ -64,6 +64,7 @@ class FileDisk extends Flysystem
         if (method_exists($adapter, 'getUrl')) {
             return $adapter->getUrl($path);
         } elseif ($adapter instanceof AwsS3Adapter) {
+            $path = ltrim($path,'/');
             return $this->getAwsUrl($adapter, $path);
         } elseif ($adapter instanceof LocalAdapter) {
             return $this->getLocalUrl($path);
