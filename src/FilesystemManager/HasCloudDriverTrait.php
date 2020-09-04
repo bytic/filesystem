@@ -46,6 +46,9 @@ trait HasCloudDriverTrait
                 'secret' => $config['secret'],
             ];
         }
+        if (empty($config['endpoint'])) {
+            unset($config['endpoint']);
+        }
 
         return $config;
     }
