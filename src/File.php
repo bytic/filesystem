@@ -122,9 +122,13 @@ class File extends \League\Flysystem\File
         return 'file';
     }
 
-    public function download(): \Symfony\Component\HttpFoundation\StreamedResponse
+    /**
+     * @param null|string $name
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function download($name = null): \Symfony\Component\HttpFoundation\StreamedResponse
     {
-        return $this->getFilesystem()->download($this->getPath(), $this->getName());
+        return $this->getFilesystem()->download($this->getPath(), $name ? $name : $this->getName());
     }
 
     /**
