@@ -70,6 +70,7 @@ class File extends \League\Flysystem\File
     {
         $this->setPath($this->getPathFolder() . $this->getName());
     }
+
     /**
      * @inheritdoc
      * @param string $path
@@ -79,6 +80,7 @@ class File extends \League\Flysystem\File
         $this->parseNameFromPath($path);
         return parent::setPath($path);
     }
+
     /**
      * @return string
      */
@@ -106,10 +108,12 @@ class File extends \League\Flysystem\File
         $this->name = $name;
         return $this;
     }
+
     protected function initName()
     {
         $this->name = $this->getDefaultName();
     }
+
     /**
      * @return string
      */
@@ -117,7 +121,12 @@ class File extends \League\Flysystem\File
     {
         return 'file';
     }
-    
+
+    public function download(): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        return $this->getFilesystem()->download($this->getPath(), $this->getName());
+    }
+
     /**
      * @return mixed
      */
@@ -128,6 +137,7 @@ class File extends \League\Flysystem\File
         }
         return $this->url;
     }
+
     protected function initUrl()
     {
         $this->url = $this->getFilesystem()->getUrl($this->getPath());

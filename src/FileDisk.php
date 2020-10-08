@@ -133,4 +133,64 @@ class FileDisk extends Flysystem
     {
         return rtrim($url, '/') . '/' . ltrim($path, '/');
     }
+
+
+
+    /**
+     * Create a streamed response for a given file.
+     *
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array|null  $headers
+     * @param  string|null  $disposition
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function response($path, $name = null, array $headers = [], $disposition = 'inline')
+    {
+        $response = new \Symfony\Component\HttpFoundation\StreamedResponse;
+
+        $filename = $name ?? basename($path);
+
+        $disposition = $response->headers->makeDisposition(
+            $disposition, $filename, $this->fallbackName($filename)
+        );
+
+        $response->headers->replace($headers + [
+                'Content-Type' => $this->getMimetype($path),
+                'Content-Length' => $this->getSize($path),
+                'Content-Disposition' => $disposition,
+            ]);
+
+        $response->setCallback(function () use ($path) {
+            $stream = $this->readStream($path);
+            fpassthru($stream);
+            fclose($stream);
+        });
+
+        return $response;
+    }
+
+    /**
+     * Create a streamed download response for a given file.
+     *
+     * @param  string  $path
+     * @param  string|null  $name
+     * @param  array|null  $headers
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function download($path, $name = null, array $headers = [])
+    {
+        return $this->response($path, $name, $headers, 'attachment');
+    }
+
+    /**
+     * Convert the string to ASCII characters that are equivalent to the given name.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    protected function fallbackName($name)
+    {
+        return str_replace('%', '', Str::ascii($name));
+    }
 }

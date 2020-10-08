@@ -37,6 +37,7 @@
   },
   "require-dev": {
     "league/flysystem-aws-s3-v3": "^1.0",
+    "bytic/http": "^0.9|^1.0",
     "phpunit/phpunit": "^7.3|^8.0|^9.0",
     "mockery/mockery": "^1.1"
   },
