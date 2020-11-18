@@ -29,7 +29,6 @@
     "php": "^7.0",
     "bytic/config": "^0.9|^1.0",
     "bytic/cache": "^0.9|^1.0",
-    "bytic/container": "^0.9|^1.0",
     "bytic/utility": "^1.0",
     "symfony/filesystem": "^4.2|5.0",
     "league/flysystem": "^1.0",
@@ -38,6 +37,7 @@
   "require-dev": {
     "league/flysystem-aws-s3-v3": "^1.0",
     "bytic/http": "^0.9|^1.0",
+    "bytic/container": "^0.9|^1.0|^2.0",
     "phpunit/phpunit": "^7.3|^8.0|^9.0",
     "mockery/mockery": "^1.1"
   },
