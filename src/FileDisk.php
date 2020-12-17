@@ -55,6 +55,9 @@ class FileDisk extends Flysystem
      */
     public function getUrl($path)
     {
+        $path = str_replace('\\','/', $path);
+        $path = str_replace('//','/', $path);
+
         $adapter = $this->getAdapter();
 
         if ($adapter instanceof CachedAdapter) {
