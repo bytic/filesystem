@@ -2,7 +2,7 @@
 
 namespace Nip\Filesystem\Tests;
 
-use League\Flysystem\Adapter\Local;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Nip\Config\Config;
 use Nip\Container\Container;
 use Nip\Filesystem\FileDisk;
@@ -24,11 +24,11 @@ class FilesystemManagerTest extends AbstractTest
         $manager = new FilesystemManager();
         $diskLocal = $manager->disk('local');
         self::assertInstanceOf(FileDisk::class, $diskLocal);
-        self::assertInstanceOf(Local::class, $diskLocal->getAdapter());
+        self::assertInstanceOf(LocalFilesystemAdapter::class, $diskLocal->getAdapter());
 
         $diskPublic = $manager->disk('public');
         self::assertInstanceOf(FileDisk::class, $diskLocal);
-        self::assertInstanceOf(Local::class, $diskLocal->getAdapter());
+        self::assertInstanceOf(LocalFilesystemAdapter::class, $diskLocal->getAdapter());
 
         self::assertSame($diskLocal, $diskPublic);
     }

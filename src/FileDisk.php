@@ -2,15 +2,16 @@
 
 namespace Nip\Filesystem;
 
-use League\Flysystem\Adapter\Local as LocalAdapter;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
-use League\Flysystem\Cached\CachedAdapter;
+use League\Flysystem\Config;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
+use League\Flysystem\AwsS3v3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem as Flysystem;
+use League\Flysystem\PathNormalizer;
+use League\Flysystem\WhitespacePathNormalizer;
 use Nip\Utility\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-
-//use League\Flysystem\AwsS3v3\AwsS3Adapter;
 
 /**
  * Class FlysystemAdapter
@@ -18,6 +19,21 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 class FileDisk extends Flysystem
 {
+    protected $adapter;
+
+    public function __construct(
+        FilesystemAdapter $adapter,
+        array $config = [],
+        PathNormalizer $pathNormalizer = null
+    ) {
+        $this->adapter = $adapter;
+        parent::__construct($adapter, $config, $pathNormalizer);
+    }
+
+    public function getAdapter()
+    {
+        return $this->adapter;
+    }
 
     /**
      * Store the uploaded file on the disk with a given name.
@@ -60,13 +76,9 @@ class FileDisk extends Flysystem
 
         $adapter = $this->getAdapter();
 
-        if ($adapter instanceof CachedAdapter) {
-            $adapter = $adapter->getAdapter();
-        }
-
         if (method_exists($adapter, 'getUrl')) {
             return $adapter->getUrl($path);
-        } elseif ($adapter instanceof AwsS3Adapter) {
+        } elseif ($adapter instanceof AwsS3V3Adapter) {
             $path = ltrim($path,'/');
             return $this->getAwsUrl($adapter, $path);
         } elseif ($adapter instanceof LocalAdapter) {
@@ -159,8 +171,8 @@ class FileDisk extends Flysystem
         );
 
         $response->headers->replace($headers + [
-                'Content-Type' => $this->getMimetype($path),
-                'Content-Length' => $this->getSize($path),
+                'Content-Type' => $this->mimeType($path),
+                'Content-Length' => $this->fileSize($path),
                 'Content-Disposition' => $disposition,
             ]);
 
@@ -195,5 +207,29 @@ class FileDisk extends Flysystem
     protected function fallbackName($name)
     {
         return str_replace('%', '', Str::ascii($name));
+    }
+
+    /**
+     * @deprecated use mimeType
+     */
+    public function getMimetype(string $path): string
+    {
+        return $this->mimeType($path);
+    }
+
+    /**
+     * @deprecated use fileSize
+     */
+    public function getSize(string $path): int
+    {
+        return $this->fileSize($path);
+    }
+
+    /**
+     * @deprecated use deleteDirectory
+     */
+    public function deleteDir(string $location): void
+    {
+        $this->deleteDirectory($location);
     }
 }

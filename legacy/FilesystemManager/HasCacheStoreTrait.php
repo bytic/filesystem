@@ -1,10 +1,8 @@
 <?php
 
-namespace Nip\Filesystem\FilesystemManager;
 
 use League\Flysystem\Cached\CachedAdapter;
 use League\Flysystem\Cached\Storage\Memory as MemoryStore;
-use Nip\Filesystem\Cache;
 use Nip\Utility\Arr;
 
 /**

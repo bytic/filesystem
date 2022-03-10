@@ -2,7 +2,7 @@
 
 namespace Nip\Filesystem\Tests;
 
-use League\Flysystem\Adapter\Local;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use Nip\Filesystem\FileDisk;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -39,14 +39,14 @@ class FileDiskTest extends AbstractTest
     protected function tearDown(): void
     {
         parent::tearDown();
-        $filesystem = new FileDisk(new Local(TEST_FIXTURE_PATH . '/storage'));
-        $filesystem->deleteDir('tmp');
+        $filesystem = new FileDisk(new LocalFilesystemAdapter(TEST_FIXTURE_PATH . '/storage'));
+        $filesystem->deleteDirectory('tmp');
     }
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->fileDisk = new FileDisk(new Local(TEST_FIXTURE_PATH . '/storage/tmp'));
+        $this->fileDisk = new FileDisk(new LocalFilesystemAdapter(TEST_FIXTURE_PATH . '/storage/tmp'));
     }
 }
