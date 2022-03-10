@@ -3,9 +3,9 @@
 namespace Nip\Filesystem;
 
 use InvalidArgumentException;
-use League\Flysystem\Adapter\Local as LocalAdapter;
-use League\Flysystem\AdapterInterface;
-use League\Flysystem\FilesystemInterface;
+use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\FilesystemOperator;
 use Nip\Config\Config;
 
 /**
@@ -16,7 +16,6 @@ class FilesystemManager
 {
     use FilesystemManager\HasCloudDriverTrait;
     use FilesystemManager\HasDisksTrait;
-    use FilesystemManager\HasCacheStoreTrait;
 
     /**
      * The application instance.
@@ -106,7 +105,7 @@ class FilesystemManager
     protected function callCustomCreator(array $config)
     {
         $driver = $this->customCreators[$config['driver']]($this->app, $config);
-        if ($driver instanceof FilesystemInterface) {
+        if ($driver instanceof FilesystemOperator) {
             return $this->adapt($driver);
         }
 
@@ -116,10 +115,10 @@ class FilesystemManager
     /**
      * Adapt the filesystem implementation.
      *
-     * @param  \League\Flysystem\FilesystemInterface $filesystem
-     * @return \League\Flysystem\FilesystemInterface|FileDisk
+     * @param  \League\Flysystem\FilesystemOperator $filesystem
+     * @return \League\Flysystem\FilesystemOperator|FileDisk
      */
-    protected function adapt(FilesystemInterface $filesystem)
+    protected function adapt(FilesystemOperator $filesystem)
     {
         return $filesystem;
 //        return new FlysystemAdapter($filesystem);
@@ -129,11 +128,11 @@ class FilesystemManager
      * Create an instance of the local driver.
      *
      * @param  array $config
-     * @return \League\Flysystem\FilesystemInterface
+     * @return \League\Flysystem\FilesystemOperator
      */
     public function createLocalDriver($config)
     {
-        $permissions = isset($config['permissions']) ? $config['permissions'] : [];
+        $permissions = $config['permissions'] ?? [];
         $links = [];
 //        $links = Arr::get($config, 'links') === 'skip'
 //            ? LocalAdapter::SKIP_LINKS
@@ -143,9 +142,10 @@ class FilesystemManager
             $this->createDisk(
                 new LocalAdapter(
                     $config['root'],
-                    LOCK_EX,
-                    $links,
-                    $permissions
+                    null,
+                    LOCK_EX
+//                    $links,
+//                    $permissions
                 ),
                 $config
             )
@@ -155,15 +155,14 @@ class FilesystemManager
     /**
      * Create a Flysystem instance with the given adapter.
      *
-     * @param  \League\Flysystem\AdapterInterface $adapter
+     * @param  \League\Flysystem\FilesystemAdapter $adapter
      * @param  array $config
      * @return FileDisk
      */
-    protected function createDisk(AdapterInterface $adapter, $config)
+    protected function createDisk(FilesystemAdapter $adapter, $config)
     {
 //        $config = Arr::only($config, ['visibility', 'disable_asserts', 'url']);
-
-        $this->checkForCacheNeeded($adapter, $config);
+//        $this->checkForCacheNeeded($adapter, $config);
 
         return new FileDisk($adapter, count($config) > 0 ? $config : null);
     }

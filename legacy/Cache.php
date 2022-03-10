@@ -1,9 +1,8 @@
 <?php
 
-namespace Nip\Filesystem;
 
-use Psr\SimpleCache\CacheInterface;
 use League\Flysystem\Cached\Storage\AbstractCache;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class Cache
