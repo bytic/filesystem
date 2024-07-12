@@ -122,7 +122,7 @@ class FileDisk extends Flysystem
     /**
      * Get the URL for the file at the given path.
      *
-     * @param \League\Flysystem\AwsS3v3\AwsS3Adapter $adapter
+     * @param \League\Flysystem\AwsS3V3\AwsS3V3Adapter $adapter
      * @param string $path
      * @return string
      */
@@ -135,9 +135,12 @@ class FileDisk extends Flysystem
             return $this->concatPathToUrl($url, $adapter->getPathPrefix() . $path);
         }
 
-        return $adapter->getClient()->getObjectUrl(
-            $adapter->getBucket(),
-            $adapter->getPathPrefix() . $path
+        $client = $this->config->get('client');
+        $bucket = $this->config->get('bucket');
+        $prefix = $this->config->get('root');
+        return $client->getObjectUrl(
+            $bucket,
+            $prefix . $path
         );
     }
 

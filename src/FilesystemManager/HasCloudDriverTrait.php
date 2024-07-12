@@ -3,9 +3,10 @@
 namespace Nip\Filesystem\FilesystemManager;
 
 use Aws\S3\S3Client;
-use League\Flysystem\AwsS3v3\AwsS3Adapter as S3Adapter;
-use League\Flysystem\FilesystemInterface;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter as S3Adapter;
+use League\Flysystem\FilesystemOperator;
 use Nip\Filesystem\FileDisk;
+use Nip\Filesystem\Utility\S3Helper;
 
 /**
  * Trait HasCloudDriverTrait
@@ -17,18 +18,21 @@ trait HasCloudDriverTrait
      * Create an instance of the Amazon S3 driver.
      *
      * @param array $config
-     * @return FilesystemInterface|FileDisk
+     * @return FilesystemOperator|FileDisk
      */
     public function createS3Driver(array $config)
     {
         $s3Config = $this->formatS3Config($config);
-        $root = $s3Config['root'] ?? null;
+        $root = $s3Config['root'] ?? '';
         $options = $config['options'] ?? [];
 
-        return $this->adapt($this->createDisk(
-            new S3Adapter(new S3Client($s3Config), $s3Config['bucket'], $root, $options),
+        $client = new S3Client($s3Config);
+        $config['client'] = $client;
+        $disk = $this->createDisk(
+            new S3Adapter($client, $s3Config['bucket'], $root, null, null, $options),
             $config
-        ));
+        );
+        return $this->adapt($disk);
     }
 
     /**
@@ -39,17 +43,6 @@ trait HasCloudDriverTrait
      */
     protected function formatS3Config(array $config)
     {
-        $config += ['version' => 'latest'];
-        if ($config['key'] && $config['secret']) {
-            $config['credentials'] = [
-                'key' => $config['key'],
-                'secret' => $config['secret'],
-            ];
-        }
-        if (empty($config['endpoint'])) {
-            unset($config['endpoint']);
-        }
-
-        return $config;
+        return S3Helper::formatS3Config($config);
     }
 }
