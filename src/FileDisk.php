@@ -8,7 +8,6 @@ use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
 use League\Flysystem\AwsS3v3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem as Flysystem;
 use League\Flysystem\PathNormalizer;
-use League\Flysystem\WhitespacePathNormalizer;
 use Nip\Utility\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -21,6 +20,8 @@ class FileDisk extends Flysystem
 {
     protected $adapter;
 
+    protected $config;
+
     public function __construct(
         FilesystemAdapter $adapter,
         array $config = [],
@@ -28,6 +29,8 @@ class FileDisk extends Flysystem
     ) {
         $this->adapter = $adapter;
         parent::__construct($adapter, $config, $pathNormalizer);
+
+        $this->config = new Config($config);
     }
 
     public function getAdapter()
@@ -51,7 +54,7 @@ class FileDisk extends Flysystem
         // Next, we will format the path of the file and store the file using a stream since
         // they provide better performance than alternatives. Once we write the file this
         // stream will get closed automatically by us so the developer doesn't have to.
-        $result = $this->put(
+        $this->write(
             $path = trim($path . '/' . $name, '/'),
             $stream,
             $options
@@ -60,7 +63,7 @@ class FileDisk extends Flysystem
         if (is_resource($stream)) {
             fclose($stream);
         }
-        return $result ? $path : false;
+        return $this->fileExists($path) ? $path : false;
     }
 
     /**
@@ -101,8 +104,9 @@ class FileDisk extends Flysystem
         // If an explicit base URL has been set on the disk configuration then we will use
         // it as the base URL instead of the default path. This allows the developer to
         // have full control over the base path for this filesystem's generated URLs.
-        if ($config->has('url')) {
-            return $this->concatPathToUrl($config->get('url'), $path);
+        $configUrl = $config->get('url');
+        if ($configUrl) {
+            return $this->concatPathToUrl($configUrl, $path);
         }
         $path = '/storage/' . $path;
         // If the path contains "storage/public", it probably means the developer is using
@@ -231,5 +235,13 @@ class FileDisk extends Flysystem
     public function deleteDir(string $location): void
     {
         $this->deleteDirectory($location);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
     }
 }

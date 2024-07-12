@@ -1,7 +1,7 @@
 <?php
 namespace Nip\Filesystem;
 
-use League\Flysystem\FilesystemInterface;
+use League\Flysystem\FilesystemOperator;
 
 /**
  * Class File
@@ -17,7 +17,7 @@ class File
     /**
      * @inheritdoc
      */
-    public function __construct(FilesystemInterface $filesystem = null, $path = null)
+    public function __construct(FilesystemOperator $filesystem = null, $path = null)
     {
         $this->parseNameFromPath($path);
         $this->path = $path;

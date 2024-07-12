@@ -2,7 +2,7 @@
 
 namespace Nip\Filesystem\File;
 
-use League\Flysystem\FilesystemInterface;
+use League\Flysystem\FilesystemOperator;
 use Nip\Filesystem\FileDisk;
 
 /**
@@ -13,18 +13,18 @@ trait HasFilesystem
 {
 
     /**
-     * @var FilesystemInterface|FileDisk
+     * @var FilesystemOperator|FileDisk
      */
     protected $filesystem;
 
     /**
      * Set the Filesystem object.
      *
-     * @param FilesystemInterface $filesystem
+     * @param FilesystemOperator $filesystem
      *
      * @return $this
      */
-    public function setFilesystem(FilesystemInterface $filesystem)
+    public function setFilesystem(FilesystemOperator $filesystem)
     {
         $this->filesystem = $filesystem;
 
@@ -34,7 +34,7 @@ trait HasFilesystem
     /**
      * Retrieve the Filesystem object.
      *
-     * @return FilesystemInterface|FileDisk
+     * @return FilesystemOperator|FileDisk
      */
     public function getFilesystem()
     {
