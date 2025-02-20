@@ -74,15 +74,15 @@ class FileDisk extends Flysystem
      */
     public function getUrl($path)
     {
-        $path = str_replace('\\','/', $path);
-        $path = str_replace('//','/', $path);
+        $path = str_replace('\\', '/', $path);
+        $path = str_replace('//', '/', $path);
 
         $adapter = $this->getAdapter();
 
         if (method_exists($adapter, 'getUrl')) {
             return $adapter->getUrl($path);
         } elseif ($adapter instanceof AwsS3V3Adapter) {
-            $path = ltrim($path,'/');
+            $path = ltrim($path, '/');
             return $this->getAwsUrl($adapter, $path);
         } elseif ($adapter instanceof LocalAdapter) {
             return $this->getLocalUrl($path);
@@ -157,14 +157,13 @@ class FileDisk extends Flysystem
     }
 
 
-
     /**
      * Create a streamed response for a given file.
      *
-     * @param  string  $path
-     * @param  string|null  $name
-     * @param  array|null  $headers
-     * @param  string|null  $disposition
+     * @param string $path
+     * @param string|null $name
+     * @param array|null $headers
+     * @param string|null $disposition
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */
     public function response($path, $name = null, array $headers = [], $disposition = 'inline')
@@ -195,9 +194,9 @@ class FileDisk extends Flysystem
     /**
      * Create a streamed download response for a given file.
      *
-     * @param  string  $path
-     * @param  string|null  $name
-     * @param  array|null  $headers
+     * @param string $path
+     * @param string|null $name
+     * @param array|null $headers
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
      */
     public function download($path, $name = null, array $headers = [])
@@ -208,7 +207,7 @@ class FileDisk extends Flysystem
     /**
      * Convert the string to ASCII characters that are equivalent to the given name.
      *
-     * @param  string  $name
+     * @param string $name
      * @return string
      */
     protected function fallbackName($name)
@@ -246,5 +245,36 @@ class FileDisk extends Flysystem
     public function getConfig()
     {
         return $this->config;
+    }
+
+    /**
+     * @param $path
+     * @return bool
+     * @throws \League\Flysystem\FilesystemException
+     * @deprecated use fileExists
+     */
+    public function has($path)
+    {
+        return $this->fileExists($path);
+    }
+
+    /**
+     * @param string $location
+     * @param string $contents
+     * @param array $config
+     * @return void
+     * @throws \League\Flysystem\FilesystemException
+     * @deprecated use write
+     */
+    public function put(string $location, $contents, array $config = [])
+    {
+        if (is_resource($contents)) {
+            $fp = $contents;
+            $contents = '';
+            while (!feof($fp)) {
+                $contents .= fread($fp, 8192);
+            }
+        }
+        $this->write($location, $contents, $config);
     }
 }
