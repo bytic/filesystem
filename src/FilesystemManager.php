@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
+use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use Nip\Config\Config;
 
 /**
@@ -142,7 +143,17 @@ class FilesystemManager
             $this->createDisk(
                 new LocalAdapter(
                     $config['root'],
-                    null,
+                    // Customize how visibility is converted to unix permissions
+                    PortableVisibilityConverter::fromArray([
+                        'file' => [
+                            'public' => 0640,
+                            'private' => 0604,
+                        ],
+                        'dir' => [
+                            'public' => 0774,
+                            'private' => 0770,
+                        ],
+                    ]),
                     LOCK_EX
 //                    $links,
 //                    $permissions
