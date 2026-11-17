@@ -14,7 +14,7 @@ class S3Helper
     public static function formatS3Config(array $config)
     {
         $config += ['version' => 'latest'];
-        if ($config['key'] && $config['secret']) {
+        if (!empty($config['key']) && !empty($config['secret'])) {
             $config['credentials'] = [
                 'key' => $config['key'],
                 'secret' => $config['secret'],

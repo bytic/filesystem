@@ -32,9 +32,10 @@ trait HasInformation
      */
     public function getType()
     {
-        $metadata = $this->filesystem->getMetadata($this->path);
-
-        return $metadata ? $metadata['type'] : 'dir';
+        if ($this->filesystem->fileExists($this->path)) {
+            return 'file';
+        }
+        return 'dir';
     }
 
     /**
@@ -44,7 +45,7 @@ trait HasInformation
      */
     public function getTimestamp()
     {
-        return $this->filesystem->getTimestamp($this->path);
+        return $this->filesystem->lastModified($this->path);
     }
 
     /**
@@ -54,7 +55,7 @@ trait HasInformation
      */
     public function getMimetype()
     {
-        return $this->filesystem->getMimetype($this->path);
+        return $this->filesystem->mimeType($this->path);
     }
 
     /**
@@ -64,7 +65,7 @@ trait HasInformation
      */
     public function getVisibility()
     {
-        return $this->filesystem->getVisibility($this->path);
+        return $this->filesystem->visibility($this->path);
     }
 
     /**
@@ -74,7 +75,18 @@ trait HasInformation
      */
     public function getMetadata()
     {
-        return $this->filesystem->getMetadata($this->path);
+        if ($this->filesystem->fileExists($this->path)) {
+            return [
+                'type' => 'file',
+                'path' => $this->path,
+                'timestamp' => $this->filesystem->lastModified($this->path),
+                'size' => $this->filesystem->fileSize($this->path),
+            ];
+        }
+        if ($this->filesystem->directoryExists($this->path)) {
+            return ['type' => 'dir', 'path' => $this->path];
+        }
+        return false;
     }
 
     /**
@@ -84,7 +96,7 @@ trait HasInformation
      */
     public function getSize()
     {
-        return $this->filesystem->getSize($this->path);
+        return $this->filesystem->fileSize($this->path);
     }
 
 }

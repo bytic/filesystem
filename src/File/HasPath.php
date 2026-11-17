@@ -36,6 +36,7 @@ trait HasPath
     {
         $this->parseNameFromPath($path);
         $this->path = $path;
+        $this->url = null;
 
         return $this;
     }

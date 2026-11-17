@@ -16,7 +16,7 @@ trait HasOperations
      */
     public function exists()
     {
-        return $this->filesystem->has($this->path);
+        return $this->filesystem->fileExists($this->path) || $this->filesystem->directoryExists($this->path);
     }
 
     /**
@@ -48,7 +48,8 @@ trait HasOperations
      */
     public function write($content)
     {
-        return $this->filesystem->write($this->path, $content);
+        $this->filesystem->write($this->path, $content);
+        return true;
     }
 
     /**
@@ -60,7 +61,8 @@ trait HasOperations
      */
     public function writeStream($resource)
     {
-        return $this->filesystem->writeStream($this->path, $resource);
+        $this->filesystem->writeStream($this->path, $resource);
+        return true;
     }
 
     /**
@@ -72,7 +74,10 @@ trait HasOperations
      */
     public function update($content)
     {
-        return $this->filesystem->update($this->path, $content);
+        if (!$this->filesystem->fileExists($this->path)) {
+            return false;
+        }
+        return $this->write($content);
     }
 
     /**
@@ -84,7 +89,10 @@ trait HasOperations
      */
     public function updateStream($resource)
     {
-        return $this->filesystem->updateStream($this->path, $resource);
+        if (!$this->filesystem->fileExists($this->path)) {
+            return false;
+        }
+        return $this->writeStream($resource);
     }
 
     /**
@@ -96,7 +104,10 @@ trait HasOperations
      */
     public function put($content)
     {
-        return $this->filesystem->put($this->path, $content);
+        if (is_resource($content)) {
+            return $this->writeStream($content);
+        }
+        return $this->write($content);
     }
 
     /**
@@ -108,7 +119,7 @@ trait HasOperations
      */
     public function putStream($resource)
     {
-        return $this->filesystem->putStream($this->path, $resource);
+        return $this->writeStream($resource);
     }
 
     /**
@@ -129,13 +140,9 @@ trait HasOperations
      */
     public function rename($newpath)
     {
-        if ($this->filesystem->rename($this->path, $newpath)) {
-            $this->path = $newpath;
-
-            return true;
-        }
-
-        return false;
+        $this->filesystem->move($this->path, $newpath);
+        $this->setPath($newpath);
+        return true;
     }
 
     /**
@@ -147,11 +154,8 @@ trait HasOperations
      */
     public function copy($newpath)
     {
-        if ($this->filesystem->copy($this->path, $newpath)) {
-            return new self($this->filesystem, $newpath);
-        }
-
-        return false;
+        $this->filesystem->copy($this->path, $newpath);
+        return new self($this->filesystem, $newpath);
     }
 
     /**
@@ -161,6 +165,7 @@ trait HasOperations
      */
     public function delete()
     {
-        return $this->filesystem->delete($this->path);
+        $this->filesystem->delete($this->path);
+        return true;
     }
 }

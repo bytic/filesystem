@@ -4,26 +4,16 @@
          colors="true"
          bootstrap="tests/bootstrap.php"
          failOnRisky="true"
-         failOnWarning="true"
-         verbose="true">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">./src</directory>
-    </include>
-    <exclude>
-      <directory>./src/locale/data</directory>
-    </exclude>
-  </coverage>
+         failOnWarning="true">
   <testsuites>
     <testsuite name="ByTIC Framework Test Suite">
       <directory suffix="Test.php">./tests/src</directory>
+      <exclude>./tests/src/AbstractTest.php</exclude>
     </testsuite>
   </testsuites>
   <!-- Filter for coverage reports. -->
   <php>
     <ini name="error_reporting" value="-1"/>
-    <ini name="intl.default_locale" value="en"/>
-    <ini name="intl.error_level" value="0"/>
     <ini name="memory_limit" value="-1"/>
     <!--
         <env name="REDIS_HOST" value="127.0.0.1" />
