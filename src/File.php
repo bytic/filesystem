@@ -17,10 +17,13 @@ class File
     /**
      * @inheritdoc
      */
-    public function __construct(FilesystemOperator $filesystem = null, $path = null)
+    public function __construct(?FilesystemOperator $filesystem = null, $path = null)
     {
-        $this->parseNameFromPath($path);
-        $this->path = $path;
-        $this->setFilesystem($filesystem);
+        if ($path !== null) {
+            $this->setPath($path);
+        }
+        if ($filesystem !== null) {
+            $this->setFilesystem($filesystem);
+        }
     }
 }

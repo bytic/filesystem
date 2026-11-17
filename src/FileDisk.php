@@ -8,6 +8,7 @@ use League\Flysystem\Local\LocalFilesystemAdapter as LocalAdapter;
 use League\Flysystem\AwsS3v3\AwsS3V3Adapter;
 use League\Flysystem\Filesystem as Flysystem;
 use League\Flysystem\PathNormalizer;
+use League\Flysystem\PathPrefixer;
 use Nip\Utility\Str;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -25,7 +26,7 @@ class FileDisk extends Flysystem
     public function __construct(
         FilesystemAdapter $adapter,
         array $config = [],
-        PathNormalizer $pathNormalizer = null
+        ?PathNormalizer $pathNormalizer = null
     ) {
         $this->adapter = $adapter;
         parent::__construct($adapter, $config, $pathNormalizer);
@@ -49,18 +50,21 @@ class FileDisk extends Flysystem
      */
     public function putFileAs($path, $file, $name, $options = [])
     {
-        $stream = fopen($file->getRealPath(), 'r+');
+        $stream = fopen($file->getRealPath(), 'rb');
+        if ($stream === false) {
+            throw new RuntimeException('Unable to open uploaded file for reading.');
+        }
 
         // Next, we will format the path of the file and store the file using a stream since
         // they provide better performance than alternatives. Once we write the file this
         // stream will get closed automatically by us so the developer doesn't have to.
-        $this->write(
-            $path = trim($path . '/' . $name, '/'),
-            $stream,
-            $options
-        );
-
-        if (is_resource($stream)) {
+        try {
+            $this->writeStream(
+                $path = trim($path . '/' . $name, '/'),
+                $stream,
+                $options
+            );
+        } finally {
             fclose($stream);
         }
         return $this->fileExists($path) ? $path : false;
@@ -131,16 +135,17 @@ class FileDisk extends Flysystem
         // If an explicit base URL has been set on the disk configuration then we will use
         // it as the base URL instead of the default path. This allows the developer to
         // have full control over the base path for this filesystem's generated URLs.
+        $prefixer = new PathPrefixer($this->config->get('root', ''));
+        $key = $prefixer->prefixPath($path);
         if (!is_null($url = $this->getConfig()->get('url'))) {
-            return $this->concatPathToUrl($url, $adapter->getPathPrefix() . $path);
+            return $this->concatPathToUrl($url, $key);
         }
 
         $client = $this->config->get('client');
         $bucket = $this->config->get('bucket');
-        $prefix = $this->config->get('root');
         return $client->getObjectUrl(
             $bucket,
-            $prefix . $path
+            $key
         );
     }
 
@@ -184,8 +189,11 @@ class FileDisk extends Flysystem
 
         $response->setCallback(function () use ($path) {
             $stream = $this->readStream($path);
-            fpassthru($stream);
-            fclose($stream);
+            try {
+                fpassthru($stream);
+            } finally {
+                fclose($stream);
+            }
         });
 
         return $response;
@@ -253,7 +261,7 @@ class FileDisk extends Flysystem
      * @throws \League\Flysystem\FilesystemException
      * @deprecated use fileExists
      */
-    public function has($path)
+    public function has(string $path): bool
     {
         return $this->fileExists($path);
     }
@@ -269,11 +277,8 @@ class FileDisk extends Flysystem
     public function put(string $location, $contents, array $config = [])
     {
         if (is_resource($contents)) {
-            $fp = $contents;
-            $contents = '';
-            while (!feof($fp)) {
-                $contents .= fread($fp, 8192);
-            }
+            $this->writeStream($location, $contents, $config);
+            return;
         }
         $this->write($location, $contents, $config);
     }

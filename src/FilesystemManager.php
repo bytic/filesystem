@@ -133,12 +133,6 @@ class FilesystemManager
      */
     public function createLocalDriver($config)
     {
-        $permissions = $config['permissions'] ?? [];
-        $links = [];
-//        $links = Arr::get($config, 'links') === 'skip'
-//            ? LocalAdapter::SKIP_LINKS
-//            : LocalAdapter::DISALLOW_LINKS;
-
         return $this->adapt(
             $this->createDisk(
                 new LocalAdapter(
@@ -155,8 +149,6 @@ class FilesystemManager
                         ],
                     ]),
                     LOCK_EX
-//                    $links,
-//                    $permissions
                 ),
                 $config
             )
@@ -175,7 +167,7 @@ class FilesystemManager
 //        $config = Arr::only($config, ['visibility', 'disable_asserts', 'url']);
 //        $this->checkForCacheNeeded($adapter, $config);
 
-        return new FileDisk($adapter, count($config) > 0 ? $config : null);
+        return new FileDisk($adapter, $config);
     }
 
 

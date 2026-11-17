@@ -1,14 +1,17 @@
 language: php
 
 php:
-  - 7.3
-  - 7.4
   - 8.0
+  - 8.1
+  - 8.2
+  - 8.3
+  - 8.4
+  - 8.5
 
 before_script:
+  # Current secure AWS SDK releases require PHP 8.1; S3 is optional at runtime.
+  - if [ "$TRAVIS_PHP_VERSION" = "8.0" ]; then composer remove --dev --no-update league/flysystem-aws-s3-v3; fi
   - composer install --no-interaction
 
 script:
-  - vendor/bin/phpunit --coverage-clover=coverage.xml
-  - wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload  --format=php-clover coverage.xml
+  - vendor/bin/phpunit

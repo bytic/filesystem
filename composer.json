@@ -26,24 +26,23 @@
     }
   },
   "require": {
-    "php": "^7.2 || ^8.0",
+    "php": "^8.0.2",
     "bytic/config": "^1.0|^2.0",
     "bytic/cache": "^1.0|^2.0",
+    "bytic/container": "^0.9|^1.0|^2.0",
     "bytic/utility": "^1.0",
-    "symfony/filesystem": "^4.2|^5.0|^6.0|^7.0",
-    "league/flysystem": "^1.0|^2.0"
+    "symfony/filesystem": "^5.4|^6.0|^7.0|^8.0",
+    "symfony/http-foundation": "^5.4|^6.0|^7.0|^8.0",
+    "league/flysystem": "^3.35.3"
   },
   "require-dev": {
-    "league/flysystem-aws-s3-v3": "^1.0|^2.0",
+    "league/flysystem-aws-s3-v3": "^3.0",
     "bytic/http": "^1.0|^2.0",
-    "bytic/container": "^0.9|^1.0|^2.0",
-    "bytic/phpqatools": "^1.0",
-    "mockery/mockery": "^1.1"
+    "mockery/mockery": "^1.6",
+    "phpunit/phpunit": "^9.6|^10.0|^11.0|^12.0|^13.0"
   },
   "suggest": {
-    "league/flysystem-aws-s3-v3": "Required to use the Flysystem S3 driver (^1.0).",
-    "league/flysystem-cached-adapter": "Required to use the Flysystem cache (^1.0).",
-    "league/flysystem-sftp": "Required to use the Flysystem SFTP driver (^1.0)."
+    "league/flysystem-aws-s3-v3": "Required to use the Flysystem S3 driver (^3.0)."
   },
   "config": {
     "allow-plugins": {

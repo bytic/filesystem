@@ -2,6 +2,7 @@
 
 namespace Nip\Filesystem;
 
+use Nip\Config\Config;
 use Nip\Container\ServiceProviders\Providers\AbstractServiceProvider;
 use Nip\Container\ServiceProviders\Providers\BootableServiceProviderInterface;
 
